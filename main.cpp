@@ -28,27 +28,34 @@
 #include "ipx.h"
 #include "ipxserver.h"
 
-static FILE *log = NULL;
+static FILE *log = NULL; // Define a global log file pointer
 
+// Signal handler to gracefully quit the server
 static void quit_handler(int signal)
 {
-  IPX_StopServer();
-  LOG_MSG("MAIN: Server shutdown.");
+  IPX_StopServer(); // Stop the IPX server
+  LOG_MSG("MAIN: Server shutdown."); // Log a message
 #ifdef LOG_TO_FILE
-  fclose(log);
+  fclose(log); // Close the log file if it's open
 #endif
-  exit(0);
+  exit(0); // Exit the program
 }
 
+// Signal handler for daemonization
 static void daemon_handler(int signum)
 {
   switch(signum) {
-  case SIGALRM: exit(1); break;
-  case SIGCHLD: exit(1); break;
-  case SIGUSR1: exit(0); break;
+  case SIGALRM: 
+  case SIGCHLD: 
+    exit(1); // Exit with failure
+    break;
+  case SIGUSR1: 
+    exit(0); // Exit successfully
+    break;
   }
 }
 
+// Function to log messages to stdout
 int log_stdout(const char *fmt, ...)
 {
   va_list args;
@@ -71,6 +78,7 @@ int log_stdout(const char *fmt, ...)
   return ret;
 }
 
+// Function to log messages to a file
 int log_file(const char *fmt, ...)
 {
   va_list args;
@@ -93,6 +101,7 @@ int log_file(const char *fmt, ...)
   return ret;
 }
 
+// Function to daemonize the program
 void daemonize()
 {
   pid_t pid, sid, parent;
